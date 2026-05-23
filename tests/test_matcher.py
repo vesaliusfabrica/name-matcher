@@ -70,3 +70,13 @@ class TestNameMatcher:
         results = matcher.find_matches("Robert Johnson")
         scores = [r.score for r in results]
         assert scores == sorted(scores, reverse=True)
+
+    def test_min_score_filters_low_matches(self):
+        results_unfiltered = matcher.find_matches("John Smith", top_k=10, min_score=0.0)
+        results_filtered = matcher.find_matches("John Smith", top_k=10, min_score=0.95)
+        assert len(results_filtered) < len(results_unfiltered)
+        assert all(r.score >= 0.95 for r in results_filtered)
+
+    def test_min_score_one_returns_only_exact(self):
+        results = matcher.find_matches("John Smith", top_k=10, min_score=1.0)
+        assert all(r.score == 1.0 for r in results)
