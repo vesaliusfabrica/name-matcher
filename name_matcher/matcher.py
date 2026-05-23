@@ -1,5 +1,10 @@
 from dataclasses import dataclass
-from .algorithms import phonetic_screening, monge_elkan_jaro_winkler
+from .algorithms import phonetic_screening, monge_elkan_jaro_winkler, monge_elkan_trigram
+
+_SCORE_FUNCS = {
+    "jaro_winkler": monge_elkan_jaro_winkler,
+    "trigram":      monge_elkan_trigram,
+}
 
 
 @dataclass
@@ -18,20 +23,22 @@ class NameMatcher:
         self.names = names
 
     def find_matches(
-        self, query: str, top_k: int = 5, min_score: float = 0.0
+        self, query: str, top_k: int = 5, min_score: float = 0.0,
+        method: str = "jaro_winkler",
     ) -> list[MatchResult]:
         """Return the top-k candidates for *query* from the registered name list.
 
-        Steps:
-        1. Phonetic screening via Double Metaphone (fast pre-filter).
-        2. Detailed scoring with symmetric Monge-Elkan + Jaro-Winkler.
-        3. Optional score threshold: results below *min_score* are dropped.
+        Parameters
+        ----------
+        method : "jaro_winkler" | "trigram"
+            Inner similarity function used inside Monge-Elkan.
         """
+        score_func = _SCORE_FUNCS.get(method, monge_elkan_jaro_winkler)
         candidates = [n for n in self.names if phonetic_screening(query, n)]
 
         results = []
         for c in candidates:
-            score = monge_elkan_jaro_winkler(query, c)
+            score = score_func(query, c)
             if score >= min_score:
                 results.append(MatchResult(name=c, score=score))
         results.sort(key=lambda r: r.score, reverse=True)

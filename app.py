@@ -154,14 +154,24 @@ if query:
         matcher = NameMatcher(st.session_state.registry)
         results = matcher.find_matches(query, top_k=top_k, min_score=min_score)
 
-        if not results:
+        results_jw = matcher.find_matches(query, top_k=top_k, min_score=min_score, method="jaro_winkler")
+        results_tg = matcher.find_matches(query, top_k=top_k, min_score=min_score, method="trigram")
+
+        if not results_jw and not results_tg:
             st.info("閾値以上の候補が見つかりませんでした。スコア閾値を下げてみてください。")
         else:
-            st.subheader(f"「{query}」の照合結果")
-            _render_results(results)
-            st.caption(
-                f"フォネティックスクリーニング後の候補数: "
-                f"{'≥ ' if len(results) == top_k else ''}{len(results)} 件"
-            )
+            col_jw, col_tg = st.columns(2)
+            with col_jw:
+                st.markdown("#### 🔵 Jaro-Winkler")
+                if results_jw:
+                    _render_results(results_jw)
+                else:
+                    st.info("該当なし")
+            with col_tg:
+                st.markdown("#### 🟣 Trigram (Dice)")
+                if results_tg:
+                    _render_results(results_tg)
+                else:
+                    st.info("該当なし")
 else:
     st.info("上のテキストボックスに照合したい氏名を入力してください。")
