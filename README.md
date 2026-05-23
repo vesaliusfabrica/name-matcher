@@ -45,6 +45,19 @@ score = ( ME(query → candidate) + ME(candidate → query) ) / 2
 
 where each direction averages the best Jaro-Winkler match for every token. Symmetric averaging makes the score robust to "Smith John" vs "John Smith" reversal.
 
+## Web GUI (Streamlit)
+
+```bash
+python -m streamlit run app.py
+```
+
+ブラウザで `http://localhost:8501` が開きます。
+
+- **照合する氏名** — クエリを入力するとリアルタイムで候補を表示
+- **スコア閾値スライダー** — 下限スコアを動的に調整
+- **CSV インポート** — `name` 列または1列目に氏名が入った CSV を読み込んでレジストリを置き換え
+- **レジストリ編集** — サイドバーから直接編集・追加・削除
+
 ## Running tests
 
 ```bash
