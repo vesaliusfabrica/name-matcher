@@ -1,10 +1,31 @@
 import streamlit as st
 import pandas as pd
+import pathlib
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 from name_matcher import NameMatcher
+
+# ── Persistence ───────────────────────────────────────────────────────────────
+_DATA_FILE = pathlib.Path(__file__).parent / "data" / "registry.txt"
+
+_DEFAULT_REGISTRY = [
+    "John Smith", "Jon Smyth", "Jane Smith",
+    "Robert Johnson", "Roberto Johnson",
+    "Michael Brown", "Elizabeth Davis", "Smith John",
+]
+
+def _load_registry() -> list[str]:
+    if _DATA_FILE.exists():
+        names = [l.strip() for l in _DATA_FILE.read_text(encoding="utf-8").splitlines() if l.strip()]
+        if names:
+            return names
+    return _DEFAULT_REGISTRY
+
+def _save_registry(names: list[str]) -> None:
+    _DATA_FILE.parent.mkdir(exist_ok=True)
+    _DATA_FILE.write_text("\n".join(names), encoding="utf-8")
 
 st.set_page_config(
     page_title="Name Matcher",
@@ -17,16 +38,7 @@ st.caption("Double Metaphone  ·  Monge-Elkan  ·  Jaro-Winkler")
 
 # --- Session state ---
 if "registry" not in st.session_state:
-    st.session_state.registry = [
-        "John Smith",
-        "Jon Smyth",
-        "Jane Smith",
-        "Robert Johnson",
-        "Roberto Johnson",
-        "Michael Brown",
-        "Elizabeth Davis",
-        "Smith John",
-    ]
+    st.session_state.registry = _load_registry()
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -43,7 +55,8 @@ with st.sidebar:
             col = "name" if "name" in df.columns else df.columns[0]
             names = df[col].dropna().astype(str).tolist()
             st.session_state.registry = names
-            st.success(f"{len(names)} 件のデータをインポートしました")
+            _save_registry(names)
+            st.success(f"{len(names)} 件のデータをインポートしました（保存済み）")
         except Exception as exc:
             st.error(f"CSV の読み込みに失敗しました: {exc}")
 
@@ -57,7 +70,8 @@ with st.sidebar:
     if st.button("変更を適用", use_container_width=True):
         updated = [n.strip() for n in registry_text.splitlines() if n.strip()]
         st.session_state.registry = updated
-        st.success(f"{len(updated)} 件を登録しました")
+        _save_registry(updated)
+        st.success(f"{len(updated)} 件を登録しました（保存済み）")
 
     st.metric("登録件数", len(st.session_state.registry))
 
