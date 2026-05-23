@@ -155,22 +155,22 @@ if query:
         results = matcher.find_matches(query, top_k=top_k, min_score=min_score)
 
         results_jw = matcher.find_matches(query, top_k=top_k, min_score=min_score, method="jaro_winkler")
-        results_tg = matcher.find_matches(query, top_k=top_k, min_score=min_score, method="trigram")
+        results_lv = matcher.find_matches(query, top_k=top_k, min_score=min_score, method="levenshtein")
 
-        if not results_jw and not results_tg:
+        if not results_jw and not results_lv:
             st.info("閾値以上の候補が見つかりませんでした。スコア閾値を下げてみてください。")
         else:
-            col_jw, col_tg = st.columns(2)
+            col_jw, col_lv = st.columns(2)
             with col_jw:
                 st.markdown("#### 🔵 Jaro-Winkler")
                 if results_jw:
                     _render_results(results_jw)
                 else:
                     st.info("該当なし")
-            with col_tg:
-                st.markdown("#### 🟣 Trigram (Dice)")
-                if results_tg:
-                    _render_results(results_tg)
+            with col_lv:
+                st.markdown("#### 🟢 Levenshtein (編集距離)")
+                if results_lv:
+                    _render_results(results_lv)
                 else:
                     st.info("該当なし")
 else:

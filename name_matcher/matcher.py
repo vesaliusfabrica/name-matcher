@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from .algorithms import phonetic_screening, monge_elkan_jaro_winkler, monge_elkan_trigram
+from .algorithms import phonetic_screening, monge_elkan_jaro_winkler, monge_elkan_trigram, monge_elkan_levenshtein
 
 _SCORE_FUNCS = {
     "jaro_winkler": monge_elkan_jaro_winkler,
     "trigram":      monge_elkan_trigram,
+    "levenshtein":  monge_elkan_levenshtein,
 }
 
 

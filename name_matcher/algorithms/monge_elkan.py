@@ -2,6 +2,31 @@ from typing import Callable
 import jellyfish
 
 
+# ── Normalized Levenshtein ────────────────────────────────────────────────────
+
+def normalized_levenshtein(s1: str, s2: str) -> float:
+    """1 - levenshtein_distance / max(len(s1), len(s2)).
+
+    Examples
+    --------
+    "JOHN"  vs "JON"   → 1 - 1/4 = 0.75
+    "SMITH" vs "SMYTH" → 1 - 1/5 = 0.80
+    """
+    if not s1 and not s2:
+        return 1.0
+    max_len = max(len(s1), len(s2))
+    if max_len == 0:
+        return 1.0
+    return 1.0 - jellyfish.levenshtein_distance(s1, s2) / max_len
+
+
+def monge_elkan_levenshtein(name_a: str, name_b: str) -> float:
+    """One-directional Monge-Elkan using Normalized Levenshtein as inner similarity."""
+    tokens_a = name_a.upper().split()
+    tokens_b = name_b.upper().split()
+    return _one_sided(tokens_a, tokens_b, normalized_levenshtein)
+
+
 def _one_sided(tokens_a: list[str], tokens_b: list[str],
                sim_func: Callable[[str, str], float]) -> float:
     if not tokens_a or not tokens_b:
