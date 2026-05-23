@@ -57,7 +57,7 @@ def _render_results(results) -> None:
         color:{color};
         letter-spacing:-0.5px;
         line-height:1;
-    ">{r.score:.4f}</span>
+    ">{pct:.1f}%</span>
   </div>
   <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
     <div style="flex:1; background:#ddd; border-radius:6px; height:14px; overflow:hidden;">
