@@ -72,10 +72,10 @@ min_score = st.slider(
     "スコア閾値 (min_score)",
     min_value=0.0,
     max_value=1.0,
-    value=0.0,
+    value=0.75,
     step=0.01,
     format="%.2f",
-    help="このスコア未満の候補は表示しません",
+    help="このスコア未満の候補は表示しません（0.75: 広めスクリーニング / 0.85: 精度重視）",
 )
 
 st.divider()
