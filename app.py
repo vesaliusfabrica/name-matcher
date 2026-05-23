@@ -96,11 +96,17 @@ if query:
             df_result = pd.DataFrame(rows)
 
             st.dataframe(
-                df_result.style.background_gradient(
-                    subset=["スコア"], cmap="RdYlGn", vmin=0.0, vmax=1.0
-                ).format({"スコア": "{:.4f}"}),
+                df_result,
                 use_container_width=True,
                 hide_index=True,
+                column_config={
+                    "スコア": st.column_config.ProgressColumn(
+                        "スコア",
+                        min_value=0.0,
+                        max_value=1.0,
+                        format="%.4f",
+                    )
+                },
             )
 
             st.caption(
