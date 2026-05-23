@@ -23,6 +23,10 @@ matcher = NameMatcher(registry)
 results = matcher.find_matches("Jon Smythe", top_k=3)
 for r in results:
     print(f"{r.score:.4f}  {r.name}")
+
+# Filter by minimum score (e.g. only return high-confidence matches)
+results = matcher.find_matches("Jon Smythe", top_k=3, min_score=0.9)
+
 ```
 
 ## How it works
