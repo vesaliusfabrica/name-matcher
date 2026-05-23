@@ -27,6 +27,59 @@ def _save_registry(names: list[str]) -> None:
     _DATA_FILE.parent.mkdir(exist_ok=True)
     _DATA_FILE.write_text("\n".join(names), encoding="utf-8")
 
+def _score_color(score: float) -> tuple[str, str, str]:
+    """Return (hex_color, bg_color, label) based on score."""
+    if score >= 0.95:
+        return "#1a7f4b", "#d4f5e2", "高"
+    if score >= 0.85:
+        return "#b06800", "#fff3cd", "中"
+    return "#c0392b", "#fde8e8", "要確認"
+
+
+def _render_results(results) -> None:
+    cards = []
+    for r in results:
+        color, bg, label = _score_color(r.score)
+        pct = r.score * 100
+        cards.append(f"""
+<div style="
+    background:{bg};
+    border-left:5px solid {color};
+    border-radius:8px;
+    padding:14px 18px;
+    margin-bottom:10px;
+">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <span style="font-size:1.05rem; font-weight:600; color:#222;">{r.name}</span>
+    <span style="
+        font-size:2rem;
+        font-weight:800;
+        color:{color};
+        letter-spacing:-0.5px;
+        line-height:1;
+    ">{r.score:.4f}</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+    <div style="flex:1; background:#ddd; border-radius:6px; height:14px; overflow:hidden;">
+      <div style="
+          width:{pct:.1f}%;
+          background:{color};
+          height:100%;
+          border-radius:6px;
+      "></div>
+    </div>
+    <span style="
+        font-size:0.8rem;
+        font-weight:700;
+        color:{color};
+        min-width:3em;
+        text-align:right;
+    ">{label}</span>
+  </div>
+</div>""")
+    st.markdown("\n".join(cards), unsafe_allow_html=True)
+
+
 st.set_page_config(
     page_title="Name Matcher",
     page_icon="🔍",
@@ -105,24 +158,7 @@ if query:
             st.info("閾値以上の候補が見つかりませんでした。スコア閾値を下げてみてください。")
         else:
             st.subheader(f"「{query}」の照合結果")
-
-            rows = [{"氏名": r.name, "スコア": round(r.score, 4)} for r in results]
-            df_result = pd.DataFrame(rows)
-
-            st.dataframe(
-                df_result,
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "スコア": st.column_config.ProgressColumn(
-                        "スコア",
-                        min_value=0.0,
-                        max_value=1.0,
-                        format="%.4f",
-                    )
-                },
-            )
-
+            _render_results(results)
             st.caption(
                 f"フォネティックスクリーニング後の候補数: "
                 f"{'≥ ' if len(results) == top_k else ''}{len(results)} 件"
